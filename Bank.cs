@@ -3,56 +3,87 @@ using System.Security.Principal;
 
 public class Bank
 {
-    private Personkonto personkonto;
-    private Sparkonto sparkonto;
-    private Investeringskonto investeringskonto;
+    public BankAccount Personkonto { get; private set; }
+    public BankAccount Sparkonto { get; private set; }
+    public BankAccount Investeringskonto { get; private set; }
 
     public Bank(string ownerName, double initialDeposit)
     { 
-        personkonto = new Personkonto (ownerName, initialDeposit);
-        sparkonto = new Sparkonto(ownerName, initialDeposit); 
-        investeringskonto = new Investeringskonto(ownerName, initialDeposit);   
+        Personkonto = new BankAccount (ownerName, initialDeposit);
+        Sparkonto = new BankAccount(ownerName, initialDeposit); 
+        Investeringskonto = new BankAccount(ownerName, initialDeposit);   
     }
 
-    public void Transfer(BankAccount fromAccount, BankAccount toAccount, double amount)
-    {
-        if (fromAccount != null && toAccount != null && fromAccount.Balance >= amount)
-        {
-            fromAccount.Withdraw(amount);
-            toAccount.Deposit(amount);
-            Console.WriteLine($"We have transfered {amount} from {fromAccount.OwnerName} to {toAccount.OwnerName} account");
-        }
-        else
-        {
-            Console.WriteLine("Not enough funds");
-        }
+    public BankAccount GetAccountByNumber(string accountnumber)
+    { 
+        if (Personkonto.AccountNumber == accountnumber) return Personkonto;
+        if (Sparkonto.AccountNumber == accountnumber) return Sparkonto;
+        if (Investeringskonto.AccountNumber == accountnumber) return Investeringskonto;
+
+        return null;
     }
 
     public void Deposit(BankAccount account, double amount)
-    { 
-      account.Deposit(amount);
+    {
+        if (account != null)
+        {
+            account.Deposit(amount);
+        }
+        else
+        {
+            Console.WriteLine("Wrong account number");
+        }
     }
 
     public void Withdraw(BankAccount account, double amount)
     {
-       account.Withdraw(amount);
+        if (account != null)
+        {
+            account.Withdraw(amount);
+        }
+        else
+        {
+            Console.WriteLine("Wrong account number");
+        }
+
     }
-
-   public void ShowAccountBs(BankAccount account, double amount)
-   {
-     account.Withdraw(amount);
-   }
-
-    public void ShowAccountBalance(BankAccount account)
-
+    public void Transfer(BankAccount fromAccount, BankAccount toAccount, double amount)
     {
-        Console.WriteLine($" {account.OwnerName} account balance {account.GetBalance}");
+        if (fromAccount == null || toAccount == null)
+        {
+            Console.WriteLine("Invalid account number.");
+            return;
+        }
+
+        if (fromAccount == toAccount)
+        {
+            Console.WriteLine("Cannot transfer between the same account.");
+            return;
+        }
+
+        if (amount <= 0)
+        {
+            Console.WriteLine("Transfer amount must be positive.");
+            return;
+        }
+
+        if (fromAccount.Balance >= amount)
+        {
+            fromAccount.Withdraw(amount);
+            toAccount.Deposit(amount);
+            Console.WriteLine($"Transferred {amount} from {fromAccount.AccountNumber} to {toAccount.AccountNumber}");
+        }
+        else
+        {
+            Console.WriteLine("Insufficient funds for this transfer.");
+        }
+    }
+    // Show all accounts' information
+    public void ShowAllAccountInfo()
+    {
+        Personkonto.PrintAccountInfo();
+        Sparkonto.PrintAccountInfo();
+        Investeringskonto.PrintAccountInfo();
     }
 
-    public void ShowAllAccountInfo()
-    { 
-        personkonto.PrintAccountInfo();
-        sparkonto.PrintAccountInfo();
-        investeringskonto.PrintAccountInfo();
-    }
 }

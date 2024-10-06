@@ -1,12 +1,13 @@
 ﻿public class Investeringskonto : BankAccount
 {
-    public Investeringskonto(string owenerName, double initialBalance) : base(owenerName, initialBalance)
+    public Investeringskonto(string ownerName, double initialBalance) : base(ownerName, initialBalance)
     {
     }
 
+    // Overriding the PrintAccountInfo method
     public override void PrintAccountInfo()
     {
         Console.WriteLine("Investeringskonto");
-        base.PrintAccountInfo();
+        base.PrintAccountInfo();  // Calling the base class method to display common info
     }
 }
