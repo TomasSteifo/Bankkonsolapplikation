@@ -1,89 +1,110 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
+﻿using System.Linq;
 
-public class Bank
+namespace Bankkonsolapplikation
 {
-    public BankAccount Personkonto { get; private set; }
-    public BankAccount Sparkonto { get; private set; }
-    public BankAccount Investeringskonto { get; private set; }
-
-    public Bank(string ownerName, double initialDeposit)
-    { 
-        Personkonto = new BankAccount (ownerName, initialDeposit);
-        Sparkonto = new BankAccount(ownerName, initialDeposit); 
-        Investeringskonto = new BankAccount(ownerName, initialDeposit);   
-    }
-
-    public BankAccount GetAccountByNumber(string accountnumber)
-    { 
-        if (Personkonto.AccountNumber == accountnumber) return Personkonto;
-        if (Sparkonto.AccountNumber == accountnumber) return Sparkonto;
-        if (Investeringskonto.AccountNumber == accountnumber) return Investeringskonto;
-
-        return null;
-    }
-
-    public void Deposit(BankAccount account, double amount)
+    public class Bank
     {
-        if (account != null)
+        private List<BankAccount> accounts = new List<BankAccount>();
+        private List<User> users = new List<User>();
+        private User loggedInUser;
+
+        public void RegisterUser(string username, string password)
         {
-            account.Deposit(amount);
+            if (users.Any(u => u.Username == username))
+            {
+                Console.WriteLine("Username already exists. Please choose a different username.");
+            }
+            else
+            {
+                users.Add(new User(username, password));
+                Console.WriteLine("User registered successfully.");
+            }
         }
-        else
+
+        public bool Login(string username, string password)
         {
-            Console.WriteLine("Wrong account number");
+            var user = users.FirstOrDefault(u => u.Username == username);
+            if (user != null && user.ValidatePassword(password))
+            {
+                loggedInUser = user;
+                Console.WriteLine($"Login successful. Welcome, {username}!");
+                return true;
+            }
+            Console.WriteLine("Invalid username or password. Please try again.");
+            return false;
+        }
+
+        public void Logout()
+        {
+            loggedInUser = null;
+            Console.WriteLine("You have been logged out.");
+        }
+
+        public void CreateAccount(string ownerName, double initialBalance)
+        {
+            var newAccount = new BankAccount(ownerName, initialBalance);
+            accounts.Add(newAccount);
+            Console.WriteLine($"Account created with Account Number: {newAccount.AccountNumber}");
+        }
+
+        public void DeleteAccount(string accountNumber)
+        {
+            var account = GetAccountByNumber(accountNumber);
+            if (account != null)
+            {
+                accounts.Remove(account);
+                Console.WriteLine($"Account {accountNumber} deleted.");
+            }
+            else
+            {
+                Console.WriteLine("Account not found.");
+            }
+        }
+
+        public BankAccount GetAccountByNumber(string accountNumber)
+        {
+            return accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+        }
+
+        public void ShowAllAccountInfo()
+        {
+            foreach (var account in accounts)
+            {
+                account.PrintAccountInfo();
+                account.ShowTransactionHistory();
+            }
+        }
+
+        public void ShowTransactionHistory(string accountNumber)
+        {
+            var account = GetAccountByNumber(accountNumber);
+            if (account != null)
+            {
+                account.ShowTransactionHistory();
+            }
+            else
+            {
+                Console.WriteLine("Account not found.");
+            }
+        }
+
+        public List<BankAccount> GetAllAccounts()
+        {
+            return accounts;
+        }
+
+        public void TransferFunds(string fromAccountNumber, string toAccountNumber, double amount)
+        {
+            var fromAccount = GetAccountByNumber(fromAccountNumber);
+            var toAccount = GetAccountByNumber(toAccountNumber);
+            if (fromAccount != null && toAccount != null)
+            {
+                fromAccount.Transfer(toAccount, amount);
+            }
+            else
+            {
+                Console.WriteLine("Invalid account number(s) provided for transfer.");
+            }
         }
     }
-
-    public void Withdraw(BankAccount account, double amount)
-    {
-        if (account != null)
-        {
-            account.Withdraw(amount);
-        }
-        else
-        {
-            Console.WriteLine("Wrong account number");
-        }
-
-    }
-    public void Transfer(BankAccount fromAccount, BankAccount toAccount, double amount)
-    {
-        if (fromAccount == null || toAccount == null)
-        {
-            Console.WriteLine("Invalid account number.");
-            return;
-        }
-
-        if (fromAccount == toAccount)
-        {
-            Console.WriteLine("Cannot transfer between the same account.");
-            return;
-        }
-
-        if (amount <= 0)
-        {
-            Console.WriteLine("Transfer amount must be positive.");
-            return;
-        }
-
-        if (fromAccount.Balance >= amount)
-        {
-            fromAccount.Withdraw(amount);
-            toAccount.Deposit(amount);
-            Console.WriteLine($"Transferred {amount} from {fromAccount.AccountNumber} to {toAccount.AccountNumber}");
-        }
-        else
-        {
-            Console.WriteLine("Insufficient funds for this transfer.");
-        }
-    }
-    // Show all accounts' information
-    public void ShowAllAccountInfo()
-    {
-        Personkonto.PrintAccountInfo();
-        Sparkonto.PrintAccountInfo();
-        Investeringskonto.PrintAccountInfo();
-    }
-
 }

@@ -1,88 +1,97 @@
-﻿class Program
+﻿namespace Bankkonsolapplikation
 {
-    static void Main(string[] args)
+    class Program
     {
-        Console.WriteLine("Enter account owner's name:");
-        string ownerName = Console.ReadLine();
-
-        double initialDeposit = GetValidDouble("Enter initial deposit:");
-
-        Bank bank = new Bank(ownerName, initialDeposit);
-
-        bool running = true;
-        while (running)
+        static void Main(string[] args)
         {
-            Console.WriteLine("\nChoose an action:");
-            Console.WriteLine("1. Deposit money");
-            Console.WriteLine("2. Withdraw money");
-            Console.WriteLine("3. Transfer money");
-            Console.WriteLine("4. Show account balances");
-            Console.WriteLine("5. Exit");
+            BankDao bankDao = new BankDao();
+            Bank bank = new Bank();
+            BankAppUI ui = new BankAppUI(bank);
 
-            string choice = Console.ReadLine();
-
-            switch (choice)
+            // Load accounts from JSON if available
+            var loadedAccounts = bankDao.LoadData();
+            foreach (var account in loadedAccounts)
             {
-                case "1":
-                    string depositAccountNumber = GetValidAccountNumber(bank);
-                    double depositAmount = GetValidDouble("Enter deposit amount:");
-                    bank.Deposit(bank.GetAccountByNumber(depositAccountNumber), depositAmount);
-                    break;
+                bank.GetAllAccounts().Add(account);
+            }
 
-                case "2":
-                    string withdrawAccountNumber = GetValidAccountNumber(bank);
-                    double withdrawAmount = GetValidDouble("Enter withdrawal amount:");
-                    bank.Withdraw(bank.GetAccountByNumber(withdrawAccountNumber), withdrawAmount);
-                    break;
+            // User authentication
+            bool authenticated = false;
+            while (!authenticated)
+            {
+                Console.WriteLine("\nWelcome to the Bank Application");
+                Console.WriteLine("1. Login");
+                Console.WriteLine("2. Register");
+                Console.WriteLine("3. Exit");
 
-                case "3":
-                    string fromAccountNumber = GetValidAccountNumber(bank, "Which account would you like to transfer from?");
-                    string toAccountNumber = GetValidAccountNumber(bank, "Which account would you like to transfer to?");
-                    double transferAmount = GetValidDouble("Enter transfer amount:");
-                    bank.Transfer(bank.GetAccountByNumber(fromAccountNumber), bank.GetAccountByNumber(toAccountNumber), transferAmount);
-                    break;
+                string choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "1":
+                        authenticated = ui.LoginUser();
+                        break;
+                    case "2":
+                        ui.RegisterUser();
+                        break;
+                    case "3":
+                        Console.WriteLine("Exiting application...");
+                        return;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
 
-                case "4":
-                    bank.ShowAllAccountInfo();
-                    break;
-
-                case "5":
-                    running = false;
-                    break;
-
-                default:
-                    Console.WriteLine("Invalid choice, please try again.");
-                    break;
+            // Main menu, available only after successful login
+            bool running = true;
+            while (running)
+            {
+                ShowMenu();
+                string choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "1":
+                        ui.CreateAccount();
+                        break;
+                    case "2":
+                        ui.DeleteAccount();
+                        break;
+                    case "3":
+                        ui.ShowAccounts();
+                        break;
+                    case "4":
+                        ui.TransferFunds();
+                        break;
+                    case "5":
+                        ui.ShowTransactionHistory();
+                        break;
+                    case "6":
+                        bankDao.SaveData(bank.GetAllAccounts());
+                        Console.WriteLine("Data saved.");
+                        break;
+                    case "7":
+                        bank.Logout();
+                        authenticated = false;
+                        Console.WriteLine("Logged out.");
+                        running = false;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Try again.");
+                        break;
+                }
             }
         }
-    }
 
-    // Helper method to get a valid double (with input validation)
-    static double GetValidDouble(string prompt)
-    {
-        double result;
-        while (true)
+        private static void ShowMenu()
         {
-            Console.WriteLine(prompt);
-            if (double.TryParse(Console.ReadLine(), out result) && result >= 0)
-                break;
-            Console.WriteLine("Invalid input, please enter a valid positive number.");
+            Console.WriteLine("\nChoose an action:");
+            Console.WriteLine("1. Create Account");
+            Console.WriteLine("2. Delete Account");
+            Console.WriteLine("3. Show All Accounts");
+            Console.WriteLine("4. Transfer Funds");
+            Console.WriteLine("5. View Transaction History");
+            Console.WriteLine("6. Save Data");
+            Console.WriteLine("7. Logout");
         }
-        return result;
-    }
-
-    // Helper method to get a valid account number
-    static string GetValidAccountNumber(Bank bank, string prompt = "Enter account number:")
-    {
-        string accountNumber;
-        while (true)
-        {
-            Console.WriteLine(prompt);
-            accountNumber = Console.ReadLine();
-            if (bank.GetAccountByNumber(accountNumber) != null)
-                break;
-            Console.WriteLine("Invalid account number, please try again.");
-        }
-        return accountNumber;
     }
 }
