@@ -1,14 +1,13 @@
 ﻿public class Sparkonto : BankAccount
 {
-    public Sparkonto(string ownerName, double initialBalance)
-        : base(ownerName, initialBalance)
+    public Sparkonto(string ownerName, string pinCode, double initialBalance)
+        : base(ownerName, pinCode, initialBalance) // Pass arguments to base constructor
     {
     }
 
-    // Override PrintAccountInfo in Sparkonto
     public override void PrintAccountInfo()
     {
         Console.WriteLine("Sparkonto");
-        base.PrintAccountInfo();  // Optionally call the base method
+        base.PrintAccountInfo();
     }
 }

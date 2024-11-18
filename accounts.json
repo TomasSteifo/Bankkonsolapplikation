@@ -1,0 +1,12 @@
+[
+    {
+        "AccountNumber": "11112222",
+        "OwnerName": "John Doe",
+        "PinCode": "1234",
+        "Balance": 50000,
+        "TransactionHistory": [
+            "2024-01-01: Account created",
+            "2024-01-02: Deposit of 1000 SEK - Monthly saving"
+        ]
+    }
+]

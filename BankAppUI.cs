@@ -19,13 +19,21 @@ namespace Bankkonsolapplikation
 
         public bool LoginUser()
         {
-            Console.WriteLine("Enter username:");
-            string username = Console.ReadLine();
+            Console.WriteLine("Enter Account Number:");
+            string accountNumber = Console.ReadLine();
 
-            Console.WriteLine("Enter password:");
-            string password = Console.ReadLine();
+            Console.WriteLine("Enter PIN Code:");
+            string pinCode = Console.ReadLine();
 
-            return bank.Login(username, password);
+            var account = bank.AuthenticateAccount(accountNumber, pinCode);
+            if (account != null)
+            {
+                Console.WriteLine($"Login successful. Welcome, {account.OwnerName}!");
+                return true;
+            }
+
+            Console.WriteLine("Invalid login credentials. Please try again.");
+            return false;
         }
 
         public void RegisterUser()
@@ -44,9 +52,20 @@ namespace Bankkonsolapplikation
             Console.WriteLine("Enter account owner's name:");
             string ownerName = Console.ReadLine();
 
-            double initialDeposit = GetValidDouble("Enter initial deposit:");
-            bank.CreateAccount(ownerName, initialDeposit);
+            Console.WriteLine("Enter a 4-digit PIN code:");
+            string pinCode = Console.ReadLine();
+
+            Console.WriteLine("Enter initial balance:");
+            double initialBalance;
+            while (!double.TryParse(Console.ReadLine(), out initialBalance) || initialBalance < 0)
+            {
+                Console.WriteLine("Invalid balance. Please enter a valid positive number.");
+            }
+
+            // Use the Bank instance passed in the constructor
+            bank.CreateAccount(ownerName, pinCode, initialBalance);
         }
+
 
         public void DeleteAccount()
         {

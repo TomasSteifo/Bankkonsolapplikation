@@ -1,14 +1,13 @@
 ﻿public class Investeringskonto : BankAccount
 {
-    public Investeringskonto(string ownerName, double initialBalance)
-        : base(ownerName, initialBalance)
+    public Investeringskonto(string ownerName, string pinCode, double initialBalance)
+        : base(ownerName, pinCode, initialBalance) // Pass arguments to base constructor
     {
     }
 
-    // Override the PrintAccountInfo method
     public override void PrintAccountInfo()
     {
         Console.WriteLine("Investeringskonto");
-        base.PrintAccountInfo();  // Call the base method if you want to include the base information
+        base.PrintAccountInfo();
     }
 }
