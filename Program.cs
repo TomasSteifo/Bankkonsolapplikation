@@ -1,4 +1,6 @@
-﻿namespace Bankkonsolapplikation
+﻿using System;
+
+namespace Bankkonsolapplikation
 {
     class Program
     {
@@ -10,13 +12,10 @@
 
             // Load accounts from JSON if available
             var loadedAccounts = bankDao.LoadData();
-            foreach (var account in loadedAccounts)
-            {
-                bank.GetAllAccounts().Add(account);
-            }
+            bank.LoadAccounts(loadedAccounts);
 
-            // User authentication
             bool authenticated = false;
+
             while (!authenticated)
             {
                 Console.WriteLine("\nWelcome to the Bank Application");
@@ -41,17 +40,16 @@
                         break;
                 }
             }
-
+      
             // Main menu, available only after successful login
-            bool running = true;
-            while (running)
+            while (authenticated)
             {
                 ShowMenu();
                 string choice = Console.ReadLine();
                 switch (choice)
                 {
                     case "1":
-                        ui.CreateAccount();
+                        ui.CreateAccount(); // No need to pass the Bank instance explicitly
                         break;
                     case "2":
                         ui.DeleteAccount();
@@ -67,16 +65,15 @@
                         break;
                     case "6":
                         bankDao.SaveData(bank.GetAllAccounts());
-                        Console.WriteLine("Data saved.");
+                        Console.WriteLine("Data saved successfully.");
                         break;
                     case "7":
-                        bank.Logout();
                         authenticated = false;
-                        Console.WriteLine("Logged out.");
-                        running = false;
+                        bank.Logout();
+                        Console.WriteLine("Logged out. Goodbye!");
                         break;
                     default:
-                        Console.WriteLine("Invalid choice. Try again.");
+                        Console.WriteLine("Invalid choice. Please try again.");
                         break;
                 }
             }
